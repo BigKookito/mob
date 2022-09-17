@@ -2,14 +2,11 @@ from colorama import Fore, Back, Style, deinit, init, Cursor
 from msvcrt import getch
 from random import*
 
-from pygame import quit
-
 nb_cases_x = 10
 nb_cases_y = 10
 
 player_x = nb_cases_y - 1
 player_y = nb_cases_x // 2
-
 
 mob_x = [0, 0]
 mob_y = [0, nb_cases_x - 1]
@@ -23,6 +20,8 @@ compteur_points = 0
 piece_x = randint(0, nb_cases_x - 1)
 piece_y = randint(0, nb_cases_y - 1)
 
+case_laser = []
+
 try:
     r = open('high_score.txt')
     lecture_txt = r.readlines()
@@ -32,6 +31,7 @@ except:
     lecture_separe = ['0', '0', '0']
 
 def actualisation():
+    global case_laser
     print(Cursor.POS(0, 0))
     print("—————————————————————————————")
     for y in range(nb_cases_y):
@@ -40,6 +40,8 @@ def actualisation():
             for i in range(len(mob_x)):
                 if x == mob_x[i] and y == mob_y[i]:
                     mob_nb += 1
+            if [x, y] in case_laser:
+                print(Back.RED, end="")
             if mob_nb >= 1:
                 if mob_nb == 1:
                     print(Fore.YELLOW + " " + str(mob_nb) + " " + Style.RESET_ALL, end="")
@@ -57,6 +59,7 @@ def actualisation():
     print(Cursor.POS(35, 7) + Fore.BLUE + 'Le record est de ' + Fore.CYAN + Style.BRIGHT + lecture_separe[2] + Style.RESET_ALL + Fore.BLUE + ' points avec ' + Fore.CYAN + Style.BRIGHT + lecture_separe[1] + Style.RESET_ALL + Fore.BLUE + ' monstres (' + Fore.CYAN + Style.BRIGHT + lecture_separe[0] + Style.RESET_ALL + Fore.BLUE + ' tours)' + Style.RESET_ALL)
     print(Cursor.POS(35, 9) + Style.BRIGHT + Fore.BLUE + "Infos :" + Style.RESET_ALL, "Tour :", compteur_tour + 1, "– Monstres :", len(mob_x), '– Points :', compteur_points)
     print(Cursor.POS(0, nb_cases_y + 2))
+    case_laser = []
 
 def deplacement_mob():
     global mob_x, mob_y
@@ -161,6 +164,8 @@ def rayon_left():
             mob_a_enlever.append(i)
     mob_x = [x for i, x in enumerate(mob_x) if i not in mob_a_enlever]
     mob_y = [y for i, y in enumerate(mob_y) if i not in mob_a_enlever]
+    for x in range(0, player_x):
+        case_laser.append([x, player_y])
 
 def main():
     global player_x, player_y, compteur_tour
