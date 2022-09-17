@@ -36,7 +36,7 @@ def actualisation():
 
 
 def deplacement_mob():
-    global mob_x, mob_
+    global mob_x, mob_y
     for i in range(len(mob_x)):
         if mob_x[i] < player_x and mob_y[i] == player_y:
             # Si le mob est sur la même ligne à gauche du player
