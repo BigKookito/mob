@@ -21,6 +21,14 @@ compteur_points = 0
 piece_x = randint(0, nb_cases_x)
 piece_y = randint(0, nb_cases_y)
 
+try:
+    r = open('high_score.txt')
+    lecture_txt = r.readlines()
+    lecture_separe = lecture_txt[0].split()
+    r.close()
+except:
+    lecture_separe = ['0', '0', '0']
+
 def actualisation():
     print(Cursor.POS(0, 0))
     print("—————————————————————————————")
@@ -44,7 +52,8 @@ def actualisation():
             else:
                 print(" . " + Style.RESET_ALL, end="")
         print("")
-    print(Cursor.POS(35, 8) + Style.BRIGHT + "Infos :" + Style.RESET_ALL, "Tour :", compteur_tour + 1, "– Monstres :", len(mob_x), '– Points :', compteur_points)
+    print(Cursor.POS(35, 7) + Fore.BLUE + 'Le record est de ' + Fore.CYAN + Style.BRIGHT + lecture_separe[2] + Style.RESET_ALL + Fore.BLUE + ' points avec ' + Fore.CYAN + Style.BRIGHT + lecture_separe[1] + Style.RESET_ALL + Fore.BLUE + ' monstres (' + Fore.CYAN + Style.BRIGHT + lecture_separe[0] + Style.RESET_ALL + Fore.BLUE + ' tours)' + Style.RESET_ALL)
+    print(Cursor.POS(35, 9) + Style.BRIGHT + Fore.BLUE + "Infos :" + Style.RESET_ALL, "Tour :", compteur_tour + 1, "– Monstres :", len(mob_x), '– Points :', compteur_points)
     print(Cursor.POS(0, nb_cases_y + 2))
 
 def deplacement_mob():
@@ -121,6 +130,9 @@ def test_collision():
     # on compare les postitions des mobs avec celle du joueur
     for i in range(len(mob_x)):
         if player_y == mob_y[i] and player_x == mob_x[i]:
+            if compteur_points > int(lecture_separe[2]):
+                with open('high_score.txt', 'w') as r:
+                    r.write(str(compteur_tour) + ' ' + str(len(mob_x)) + ' ' + str(compteur_points))
             exit('╠═══╍╍ Vous avez perdu ╍╍═══╣')
         elif player_x == piece_x and player_y == piece_y:
             compteur_points += 1
@@ -138,9 +150,6 @@ def main():
         deplacement_mob()
         test_collision()
         actualisation()
-
-        # print(player_x, player_y)
-
 
 if __name__ == '__main__':
     main()
