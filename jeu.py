@@ -2,11 +2,13 @@ from colorama import Fore, Back, Style, deinit, init, Cursor
 from msvcrt import getch
 from random import*
 
+from pygame import quit
+
 nb_cases_x = 10
 nb_cases_y = 10
 
-player_x = 6
-player_y = 3
+player_x = nb_cases_y - 1
+player_y = nb_cases_x // 2
 
 
 mob_x = [0, 0]
@@ -18,8 +20,8 @@ mob_y = [0, nb_cases_x - 1]
 compteur_tour = 0
 compteur_points = 0
 
-piece_x = randint(0, nb_cases_x)
-piece_y = randint(0, nb_cases_y)
+piece_x = randint(0, nb_cases_x - 1)
+piece_y = randint(0, nb_cases_y - 1)
 
 try:
     r = open('high_score.txt')
@@ -32,8 +34,8 @@ except:
 def actualisation():
     print(Cursor.POS(0, 0))
     print("—————————————————————————————")
-    for x in range(nb_cases_x):
-        for y in range(nb_cases_y):
+    for y in range(nb_cases_y):
+        for x in range(nb_cases_x):
             mob_nb = 0
             for i in range(len(mob_x)):
                 if x == mob_x[i] and y == mob_y[i]:
@@ -103,25 +105,31 @@ def deplacement_player():
     # print("Saisissez g, d, b, h")
     move = getch().lower()
     if move == b'q':
-        if player_y != 0:
-            player_y -= 1
-        else:
-            print(Fore.RED + "Vous ne pouvez pas traverser le mur" + Style.RESET_ALL)
-    elif move == b'd':
-        if player_y != nb_cases_y-1:
-            player_y += 1
-        else:
-            print(Fore.RED + "Vous ne pouvez pas traverser le mur" + Style.RESET_ALL)
-    elif move == b'z':
         if player_x != 0:
             player_x -= 1
         else:
             print(Fore.RED + "Vous ne pouvez pas traverser le mur" + Style.RESET_ALL)
-    elif move == b's':
+    elif move == b'd':
         if player_x != nb_cases_x-1:
             player_x += 1
         else:
             print(Fore.RED + "Vous ne pouvez pas traverser le mur" + Style.RESET_ALL)
+    elif move == b'z':
+        if player_y != 0:
+            player_y -= 1
+        else:
+            print(Fore.RED + "Vous ne pouvez pas traverser le mur" + Style.RESET_ALL)
+    elif move == b's':
+        if player_y != nb_cases_y-1:
+            player_y += 1
+        else:
+            print(Fore.RED + "Vous ne pouvez pas traverser le mur" + Style.RESET_ALL)
+    elif move == b'e':
+        direction_laser = getch().lower()
+        if direction_laser == b'q':
+            rayon_left()
+        else:
+            print("Direction invalide, il faut taper z,q,s,d")
     else:
         print("Déplacement invalide, il faut taper z,q,s,d")
 
@@ -136,8 +144,23 @@ def test_collision():
             exit('╠═══╍╍ Vous avez perdu ╍╍═══╣')
         elif player_x == piece_x and player_y == piece_y:
             compteur_points += 1
-            piece_x = randint(0, nb_cases_x)
-            piece_y = randint(0, nb_cases_y)
+            piece_x = randint(0, nb_cases_x - 1)
+            piece_y = randint(0, nb_cases_y - 1)
+
+def ajout_mob():
+    global mob_x, mob_y
+    if compteur_tour % 10 == 0:
+        mob_x.append(choices([0, nb_cases_x])[0])
+        mob_y.append(choices([0, nb_cases_y])[0])
+
+def rayon_left():
+    global mob_x, mob_y
+    mob_a_enlever = []
+    for i in range(len(mob_x)):
+        if mob_x[i] < player_x and mob_y[i] == player_y:
+            mob_a_enlever.append(i)
+    mob_x = [x for i, x in enumerate(mob_x) if i not in mob_a_enlever]
+    mob_y = [y for i, y in enumerate(mob_y) if i not in mob_a_enlever]
 
 def main():
     global player_x, player_y, compteur_tour
@@ -149,6 +172,7 @@ def main():
         test_collision()
         deplacement_mob()
         test_collision()
+        ajout_mob()
         actualisation()
 
 if __name__ == '__main__':
