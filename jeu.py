@@ -18,6 +18,7 @@ piece_x = randint(0, nb_cases_x - 1)
 piece_y = randint(0, nb_cases_y - 1)
 
 case_laser = []
+lecture_separe = []
 
 nb_mob_mort = 0
 
@@ -29,18 +30,23 @@ etat_laser_right = - cooldown_laser
 etat_laser_top = - cooldown_laser
 etat_laser_bottom = - cooldown_laser
 
-try:
-    r = open('high_score.txt')
-    lecture_txt = r.readlines()
-    lecture_separe = lecture_txt[0].split()
-    r.close()
-except:
-    lecture_separe = ['0', '0', '0']
+choix_niveau = ''
+
+
+def read_highscore():
+    global lecture_separe
+    try:
+        r = open(choix_niveau + '.txt')
+        lecture_txt = r.readlines()
+        lecture_separe = lecture_txt[0].split()
+        r.close()
+    except:
+        lecture_separe = ['0', '0', '0']
 
 
 def actualisation():
-    global case_laser
-    print(Cursor.POS(0, 0))
+    global case_laser, choix_niveau
+    print(Cursor.POS(0, 3))
     print('\033[5C' + '╱╳╲ MOB HUNTER ╱╳╲')
     print("—————————————————————————————")
     for y in range(nb_cases_y):
@@ -65,21 +71,23 @@ def actualisation():
             else:
                 print(" . " + Style.RESET_ALL, end="")
         print("")
-    print(Cursor.POS(35, 4) + Fore.BLUE + 'Le record est de ' + Fore.CYAN + Style.BRIGHT + lecture_separe[
-        2] + Style.RESET_ALL + Fore.BLUE + ' points avec ' + Fore.CYAN + Style.BRIGHT + lecture_separe[
-              1] + Style.RESET_ALL + Fore.BLUE + ' monstres tués (' + Fore.CYAN + Style.BRIGHT + lecture_separe[
-              0] + Style.RESET_ALL + Fore.BLUE + ' tours)' + Style.RESET_ALL)
-    print(Cursor.POS(35, 6) + Style.BRIGHT + Fore.BLUE + "Infos :" + Style.RESET_ALL, "Tour :", compteur_tour + 1,
+    print(Cursor.POS(35, 7) + Fore.BLUE + Style.BRIGHT + 'Le record est du niveau ' + choix_niveau + ' est de ' + Fore.CYAN + lecture_separe[
+        2] + Fore.BLUE + ' points avec ' + Fore.CYAN + lecture_separe[
+              1] + Fore.BLUE + ' monstres tués (' + Fore.CYAN + lecture_separe[
+              0] + Fore.BLUE + ' tours)' + Style.RESET_ALL)
+    print(Cursor.POS(35, 9) + Style.BRIGHT + Fore.BLUE + "Infos :" + Style.RESET_ALL, "Tours :", compteur_tour + 1,
           "– Monstres tués :", nb_mob_mort, '– Points :', compteur_points)
-
-    print(Cursor.POS(35, 8) + 'Statut lasers :', end="   ")
+    print(Cursor.POS(35, 11) + Style.BRIGHT + Fore.BLUE + 'Statut lasers :', end="   ")
     print(' ☩ ')
-    laser_status(50, 8, etat_laser_left)
-    laser_status(56, 8, etat_laser_right)
-    laser_status(53, 7, etat_laser_top)
-    laser_status(53, 9, etat_laser_bottom)
+    laser_status(51, 11, etat_laser_left)
+    laser_status(55, 11, etat_laser_right)
+    laser_status(53, 10, etat_laser_top)
+    laser_status(53, 12, etat_laser_bottom)
+    print(Cursor.POS(35, 13) + Style.BRIGHT + Fore.BLUE + 'Règle du niveau',
+          Fore.CYAN + choix_niveau + Fore.BLUE + ':' + Style.RESET_ALL + ' Fréquence apparition monstres: ' + str(
+              frequence_ajout_mob) + ' - Attente avant réutilisation laser ' + str(cooldown_laser))
 
-    print(Cursor.POS(0, nb_cases_y + 3))
+    print(Cursor.POS(0, nb_cases_y + 4))
     case_laser = []
 
 
@@ -88,7 +96,7 @@ def laser_status(curseur_x, curseur_y, etat):
         color = Fore.BLUE
     else:
         color = Fore.RED
-    print(Cursor.POS(curseur_x, curseur_y) + color + ' ⚫ ' + Fore.RESET)
+    print(Cursor.POS(curseur_x, curseur_y) + color + ' ● ' + Fore.RESET)
 
 
 def deplacement_mob():
@@ -141,22 +149,22 @@ def action_player():
         if player_x != 0:
             player_x -= 1
         else:
-            print(Fore.RED + "Vous ne pouvez pas traverser le mur" + Style.RESET_ALL)
+            print(Fore.RED + Cursor.POS(0, nb_cases_y + 6) + "Vous ne pouvez pas traverser le mur" + Style.RESET_ALL)
     elif move == b'd':
         if player_x != nb_cases_x - 1:
             player_x += 1
         else:
-            print(Fore.RED + "Vous ne pouvez pas traverser le mur" + Style.RESET_ALL)
+            print(Fore.RED + Cursor.POS(0, nb_cases_y + 6) + "Vous ne pouvez pas traverser le mur" + Style.RESET_ALL)
     elif move == b'z':
         if player_y != 0:
             player_y -= 1
         else:
-            print(Fore.RED + "Vous ne pouvez pas traverser le mur" + Style.RESET_ALL)
+            print(Fore.RED + Cursor.POS(0, nb_cases_y + 6) + "Vous ne pouvez pas traverser le mur" + Style.RESET_ALL)
     elif move == b's':
         if player_y != nb_cases_y - 1:
             player_y += 1
         else:
-            print(Fore.RED + "Vous ne pouvez pas traverser le mur" + Style.RESET_ALL)
+            print(Fore.RED + Cursor.POS(0, nb_cases_y + 6) + "Vous ne pouvez pas traverser le mur" + Style.RESET_ALL)
 
     # --> direction des lasers
     elif move == b'e':
@@ -174,9 +182,10 @@ def action_player():
             rayon_bottom()
             etat_laser_bottom = compteur_tour
         else:
-            print("Direction invalide ou attendre avant de pouvoir utiliser")
+            print(Fore.RED + Cursor.POS(0,
+                                        nb_cases_y + 6) + "Direction invalide ou attendre avant de pouvoir utiliser" + Style.RESET_ALL)
     else:
-        print("Déplacement invalide, il faut taper z,q,s,d")
+        print(Fore.RED + Cursor.POS(0, nb_cases_y + 6) + "Déplacement invalide" + Style.RESET_ALL)
 
 
 def test_collision():
@@ -185,10 +194,11 @@ def test_collision():
     for i in range(len(mob_x)):
         if player_y == mob_y[i] and player_x == mob_x[i]:
             if compteur_points > int(lecture_separe[2]):
-                print(Cursor.POS(55, 2) + Style.BRIGHT + Fore.RED + " NOUVEAU RECORD" + Style.RESET_ALL + Cursor.POS(0,
+                print(Cursor.POS(55, 6) + Style.BRIGHT + Fore.RED + " NOUVEAU RECORD" + Style.RESET_ALL + Cursor.POS(0,
                                                                                                                      nb_cases_y + 2))
-                with open('high_score.txt', 'w') as r2:
+                with open(choix_niveau + '.txt', 'w') as r2:
                     r2.write(str(compteur_tour) + ' ' + str(nb_mob_mort) + ' ' + str(compteur_points))
+            print(Cursor.POS(0, nb_cases_y + 6))
             exit('╠═══╍╍ Vous avez perdu ╍╍═══╣')
         elif player_x == piece_x and player_y == piece_y:
             compteur_points += 1
@@ -256,24 +266,45 @@ def rayon_bottom():
 
 
 def options_jeu():
-    global cooldown_laser, frequence_ajout_mob
-    choix_niveau = input('Saisir la difficulté : e, n, h')
-    if choix_niveau == 'e':
+    global cooldown_laser, frequence_ajout_mob, choix_niveau
+    choix_niveau = input('Saisir la difficulté : easy, normal, hard ou rules -> ')
+    if choix_niveau == 'easy':
         cooldown_laser = 5
         frequence_ajout_mob = 10
-    elif choix_niveau == 'n':
+    elif choix_niveau == 'normal':
         cooldown_laser = 10
         frequence_ajout_mob = 10
-    elif choix_niveau == 'h':
+    elif choix_niveau == 'hard':
         cooldown_laser = 10
         frequence_ajout_mob = 5
+    elif choix_niveau == 'rules':
+        affichage_des_regles()
     else:
         exit('Aucun choix de niveau fait')
 
+def affichage_des_regles():
+    print(Fore.BLUE + Style.BRIGHT + 'Les règles de MOB HUNTER :' + Style.RESET_ALL)
+    print('')
+    print("Le jeu se joue sur la console python souvent en bas de votre écran, quand le jeu se lance, il faut écrire le niveau de difficulté souhaité ou l'affichage des règles.",
+    "Votre personnage est le rond bleu à droite quand le jeu se lance, les chiffres correspondent au nombre de monstres qu'il y a sur la même case, et l'étoile (*) c'est les pièces qu'il faut attrapper",
+    "Il faut utiliser les touches z, q, s, d pour se déplacer ce qui correspond respectivement à haut, gauche, bas, droite. Puis il y a la touche e, une fois pressé il faut indiquer une direction pour l'envoi du laser.",
+    "Chaque laser, une fois utilisé on doit attendre plusieurs tours avant de l'utiliser à nouveau, cela dépend du niveau de difficulté. C'est pareil pour l'apparition de nouveau monstres.")
+
+    print("Le but du jeu est de faire un maximum de points dans chaque niveau de difficulté, ils sont affichés en haut, le but c'est de les dépasser.")
+    print('')
+    revenir_au_menu = input(Fore.BLUE + Style.BRIGHT + 'Saisir entrée pour revenir au menu :' + Style.RESET_ALL)
+    if revenir_au_menu == '':
+        clear_terminal()
+        print(Cursor.POS(0, 0))
+        options_jeu()
+
+def clear_terminal():
+    print('\033[2J')
 
 def main():
     global player_x, player_y, compteur_tour
     options_jeu()
+    read_highscore()
     actualisation()
     while True:
         compteur_tour += 1
